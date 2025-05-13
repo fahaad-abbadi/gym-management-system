@@ -17,7 +17,13 @@ public class FeedbackDTO {
     private String feedbackText;
     private Long rating;
     private Date feedbackDate;
-    private Long userId;       // ✅ Member User ID (who gave feedback)
-    private Long trainerId;    // ✅ Trainer User ID (who received feedback)
+
+    // Only for sending to frontend
+    private String memberName;   // From member.getUserName()
+    private String trainerName;  // From trainer.getUserName()
+
+    // Optional: Keep IDs only for creation & update (not for response)
+    private Long userId;
+    private Long trainerId;
 }
 

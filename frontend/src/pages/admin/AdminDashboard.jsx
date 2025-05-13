@@ -76,7 +76,7 @@ const AdminDashboard = () => {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold mb-8 text-white">Dashboard</h1>
+        {/* <h1 className="text-2xl font-bold mb-8 text-white">Dashboard</h1> */}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <StatCard title="Total Members" value={stats.members} color="red" />

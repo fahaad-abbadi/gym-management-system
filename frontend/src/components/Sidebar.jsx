@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   FaHome,
   FaUsers,
@@ -14,56 +14,69 @@ import {
   FaCog,
   FaChevronDown,
   FaChevronRight,
-  FaCheckCircle
-} from 'react-icons/fa';
-import { getRole } from '@/services/api/apiConfig';
+  FaCheckCircle,
+} from "react-icons/fa";
+import { getRole } from "@/services/api/apiConfig";
 
 const role = getRole();
 
 const navStructure = {
   ADMIN: [
     {
-      section: 'Main',
+      section: "Main",
+      items: [{ to: "/admin", label: "Dashboard", icon: <FaHome /> }],
+    },
+    {
+      section: "Management",
       items: [
-        { to: '/admin', label: 'Dashboard', icon: <FaHome /> },
+        { to: "/admin/members", label: "Manage Members", icon: <FaUsers /> },
+        {
+          to: "/admin/trainers",
+          label: "Manage Trainers",
+          icon: <FaUserTie />,
+        },
+        { to: "/admin/staff", label: "Manage Staff", icon: <FaUserTie /> }, // ➡ Newly added Manage Staff
+        {
+          to: "/admin/trainer-approvals",
+          label: "Approvals",
+          icon: <FaCheckCircle />,
+        },
+        { to: "/admin/classes", label: "Classes", icon: <FaCalendarAlt /> },
+        { to: "/admin/inventory", label: "Inventory", icon: <FaDumbbell /> },
       ],
     },
     {
-      section: 'Management',
+      section: "Programs",
       items: [
-        { to: '/admin/members', label: 'Members', icon: <FaUsers /> },
-        { to: '/admin/trainers', label: 'Trainers', icon: <FaUserTie /> },
-        { to: '/admin/trainer-approvals', label: 'Approvals', icon: <FaCheckCircle /> }, // 🆕 Added here
-        { to: '/admin/classes', label: 'Classes', icon: <FaCalendarAlt /> },
-        { to: '/admin/inventory', label: 'Inventory', icon: <FaDumbbell /> },
+        { to: "/admin/workouts", label: "Workout Plans", icon: <FaDumbbell /> },
+        { to: "/admin/diets", label: "Diet Plans", icon: <FaUtensils /> },
       ],
     },
     {
-      section: 'Programs',
+      section: "Feedback & Reviews",
       items: [
-        { to: '/admin/workouts', label: 'Workout Plans', icon: <FaDumbbell /> },
-        { to: '/admin/diets', label: 'Diet Plans', icon: <FaUtensils /> },
+        {
+          to: "/admin/feedback",
+          label: "Member Feedback",
+          icon: <FaComments />,
+        },
+        { to: "/admin/ratings", label: "Trainer Ratings", icon: <FaStar /> },
       ],
     },
     {
-      section: 'Feedback & Reviews',
+      section: "Analytics & Finance",
       items: [
-        { to: '/admin/feedback', label: 'Member Feedback', icon: <FaComments /> },
-        { to: '/admin/ratings', label: 'Trainer Ratings', icon: <FaStar /> },
+        {
+          to: "/admin/analytics",
+          label: "Class Analytics",
+          icon: <FaClipboardList />,
+        },
+        { to: "/admin/revenue", label: "Revenue Report", icon: <FaWallet /> },
       ],
     },
     {
-      section: 'Analytics & Finance',
-      items: [
-        { to: '/admin/analytics', label: 'Class Analytics', icon: <FaClipboardList /> },
-        { to: '/admin/revenue', label: 'Revenue Report', icon: <FaWallet /> },
-      ],
-    },
-    {
-      section: 'Settings',
-      items: [
-        { to: '/profile', label: 'Admin Profile', icon: <FaCog /> },
-      ],
+      section: "Settings",
+      items: [{ to: "/profile", label: "Admin Profile", icon: <FaCog /> }],
     },
   ],
 };
@@ -94,7 +107,11 @@ const Sidebar = () => {
               onClick={() => toggleSection(group.section)}
             >
               <span>{group.section}</span>
-              {openSections[group.section] ? <FaChevronDown size={12} /> : <FaChevronRight size={12} />}
+              {openSections[group.section] ? (
+                <FaChevronDown size={12} />
+              ) : (
+                <FaChevronRight size={12} />
+              )}
             </button>
 
             {openSections[group.section] && (
@@ -105,8 +122,8 @@ const Sidebar = () => {
                     to={item.to}
                     className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition ${
                       location.pathname === item.to
-                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-800'
-                        : ''
+                        ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-800"
+                        : ""
                     }`}
                   >
                     {item.icon}

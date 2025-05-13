@@ -19,12 +19,13 @@ import AdminManageUsers from './pages/admin/AdminManageUsers';
 
 import ManageMembers from '@/pages/admin/management/ManageMembers';
 import ManageTrainers from '@/pages/admin/management/ManageTrainers';
+import ManageStaffs from '@/pages/admin/management/ManageStaffs';
 import ManageClasses from '@/pages/admin/management/ManageClasses';
 import ManageInventory from '@/pages/admin/management/ManageInventory';
 import ManageWorkouts from '@/pages/admin/management/ManageWorkouts';
 import ManageDiets from '@/pages/admin/management/ManageDiets';
 
-import AdminTrainerApproval from './pages/admin/AdminTrainerApproval';
+import AdminApprovals from './pages/admin/AdminApprovals';
 
 import ManageFeedback from '@/pages/admin/management/ManageFeedback';
 import ManageTrainerRatings from '@/pages/admin/management/ManageTrainerRatings';
@@ -57,12 +58,13 @@ function App() {
 
         <Route path="/admin/members" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<ManageMembers />} />} />
         <Route path="/admin/trainers" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<ManageTrainers />} />} />
+        <Route path="/admin/staff" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<ManageStaffs />} />} />
         <Route path="/admin/classes" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<ManageClasses />} />} />
         <Route path="/admin/inventory" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<ManageInventory />} />} />
         <Route path="/admin/workouts" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<ManageWorkouts />} />} />
         <Route path="/admin/diets" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<ManageDiets />} />} />
 
-        <Route path="/admin/trainer-approvals" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<AdminTrainerApproval />} />} />
+        <Route path="/admin/trainer-approvals" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<AdminApprovals />} />} />
 
         <Route path="/admin/feedback" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<ManageFeedback />} />} />
         <Route path="/admin/ratings" element={<ProtectedRoute allowedRoles={['ADMIN']} element={<ManageTrainerRatings />} />} />

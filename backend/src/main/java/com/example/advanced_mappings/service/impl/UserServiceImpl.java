@@ -8,7 +8,13 @@ import com.example.advanced_mappings.enums.ApprovalStatus;
 import com.example.advanced_mappings.enums.Role;
 import com.example.advanced_mappings.exceptions.InvalidCredentialsException;
 import com.example.advanced_mappings.exceptions.NotFoundException;
+import com.example.advanced_mappings.models.Member;
+import com.example.advanced_mappings.models.Staff;
+import com.example.advanced_mappings.models.Trainer;
 import com.example.advanced_mappings.models.User;
+import com.example.advanced_mappings.repos.MemberRepository;
+import com.example.advanced_mappings.repos.StaffRepository;
+import com.example.advanced_mappings.repos.TrainerRepository;
 import com.example.advanced_mappings.repos.UserRepository;
 import com.example.advanced_mappings.security.JwtUtils;
 import com.example.advanced_mappings.service.UserService;
@@ -22,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -30,6 +37,9 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final TrainerRepository trainerRepository;
+    private final MemberRepository memberRepository;
+    private final StaffRepository staffRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final JwtUtils jwtUtils;
@@ -50,13 +60,64 @@ public class UserServiceImpl implements UserService {
                 .approvalStatus(approvalStatus)
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        createProfileIfNotExists(savedUser);
 
         return Response.builder()
                 .status(201)
                 .message("User registered successfully")
                 .build();
     }
+
+    @Override
+    public Response approveTrainer(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (user.getRole() != Role.TRAINER) {
+            throw new IllegalArgumentException("Only trainers can be approved");
+        }
+
+        user.setApprovalStatus(ApprovalStatus.APPROVED);
+        User savedUser = userRepository.save(user);
+
+        createProfileIfNotExists(savedUser);
+
+        return Response.builder()
+                .status(200)
+                .message("Trainer approved successfully")
+                .build();
+    }
+
+    private void createProfileIfNotExists(User user) {
+        if (user.getRole() == Role.TRAINER && user.getApprovalStatus() == ApprovalStatus.APPROVED) {
+            if (trainerRepository.findByUserId(user.getId()).isEmpty()) {
+                Trainer trainerProfile = new Trainer();
+                trainerProfile.setHireDate(new Date());
+                trainerProfile.setSpeciality("General Fitness");
+                trainerProfile.setUser(user);
+                trainerRepository.save(trainerProfile);
+            }
+        } else if (user.getRole() == Role.MEMBER && user.getApprovalStatus() == ApprovalStatus.APPROVED) {
+            if (memberRepository.findByUserId(user.getId()).isEmpty()) {
+                Member memberProfile = new Member();
+                memberProfile.setJoinDate(new Date());
+                memberProfile.setUser(user);
+                memberRepository.save(memberProfile);
+            }
+        } else if (user.getRole() == Role.STAFF && user.getApprovalStatus() == ApprovalStatus.APPROVED) {
+            if (staffRepository.findByUserId(user.getId()).isEmpty()) {
+                Staff staffProfile = new Staff();
+                staffProfile.setHireDate(new Date());
+                staffProfile.setPositionTitle("Receptionist");
+                staffProfile.setSalary(25000.00);
+                staffProfile.setUser(user);
+                staffRepository.save(staffProfile);
+            }
+        }
+    }
+
 
     @Override
     public Response loginUser(LoginRequest loginRequest) {
@@ -155,24 +216,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Response approveTrainer(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        if (user.getRole() != Role.TRAINER) {
-            throw new IllegalArgumentException("Only trainers can be approved");
-        }
-
-        user.setApprovalStatus(ApprovalStatus.APPROVED);
-        userRepository.save(user);
-
-        return Response.builder()
-                .status(200)
-                .message("Trainer approved successfully")
-                .build();
-    }
-
-    @Override
     public Response updateRole(Long userId, Role newRole) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -183,12 +226,50 @@ public class UserServiceImpl implements UserService {
             user.setApprovalStatus(ApprovalStatus.PENDING);
         }
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        createProfileIfNotExists(savedUser);
 
         return Response.builder()
                 .status(200)
                 .message("Role updated")
                 .user(modelMapper.map(user, UserDTO.class))
+                .build();
+    }
+
+    @Override
+    public Response getPendingStaff() {
+        List<User> pending = userRepository.findByApprovalStatus(ApprovalStatus.PENDING)
+                .stream()
+                .filter(u -> u.getRole() == Role.STAFF)
+                .toList();
+
+        List<UserDTO> dtos = modelMapper.map(pending, new TypeToken<List<UserDTO>>() {}.getType());
+
+        return Response.builder()
+                .status(200)
+                .message("Pending staff fetched")
+                .users(dtos)
+                .build();
+    }
+
+    @Override
+    public Response approveStaff(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (user.getRole() != Role.STAFF) {
+            throw new IllegalArgumentException("Only staff can be approved");
+        }
+
+        user.setApprovalStatus(ApprovalStatus.APPROVED);
+        User savedUser = userRepository.save(user);
+
+        createProfileIfNotExists(savedUser);
+
+        return Response.builder()
+                .status(200)
+                .message("Staff approved successfully")
                 .build();
     }
 
@@ -225,4 +306,3 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User not found for email: " + email));
     }
 }
-

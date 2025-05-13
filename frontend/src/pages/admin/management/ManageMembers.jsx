@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getMembers } from '@/services/member/memberService';
+import { getAllUsers } from '@/services/admin/adminService';
 import { FaSearch } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
 
 const ManageMembers = () => {
   const [members, setMembers] = useState([]);
@@ -8,31 +9,34 @@ const ManageMembers = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const res = await getMembers();
-        const memberList = res.data.members || [];
-        console.log(memberList[0].firstName)
-        setMembers(memberList);
-        setFilteredMembers(memberList);
-      } catch (error) {
-        console.error('Failed to load members:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // ✔ Fetch all users and filter only members (from User table)
+  const fetchMembers = async () => {
+    try {
+      const res = await getAllUsers();
+      const memberList = (res.data.users || []).filter((u) => u.role === 'MEMBER');
+      console.log(res.data.users)
+      setMembers(memberList);
+      setFilteredMembers(memberList);
+    } catch (error) {
+      console.error('Failed to load members:', error);
+      toast.error('Failed to load members');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchMembers();
   }, []);
 
+  // ✔ Search members by userName or email from User data
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredMembers(members);
     } else {
       setFilteredMembers(
         members.filter((member) =>
-          member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          member.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           member.email.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
@@ -63,7 +67,7 @@ const ManageMembers = () => {
       ) : (
         <div className="overflow-x-auto bg-white rounded-lg shadow">
           <table className="w-full table-auto text-sm">
-            <thead className="bg-gray-100">
+            <thead className="bg-gray-100 text-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left">Name</th>
                 <th className="px-6 py-3 text-left">Email</th>
@@ -73,15 +77,15 @@ const ManageMembers = () => {
             </thead>
             <tbody>
               {filteredMembers.map((member) => (
-                <tr key={member.memberId} className="border-b">
-                  <td className="px-6 py-4">{member.firstName} {member.lastName}</td>
+                <tr key={member.id} className="border-b hover:bg-gray-50">
+                  <td className="px-6 py-4 font-medium">{member.userName}</td>
                   <td className="px-6 py-4">{member.email}</td>
                   <td className="px-6 py-4">{member.phoneNumber || '-'}</td>
-                  <td className="px-6 py-4">
-                    <button className="bg-indigo-600 text-white px-3 py-1 rounded-md text-xs hover:bg-indigo-700 transition mr-2">
+                  <td className="px-6 py-4 space-x-2">
+                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1 rounded text-sm">
                       Edit
                     </button>
-                    <button className="bg-red-500 text-white px-3 py-1 rounded-md text-xs hover:bg-red-600 transition">
+                    <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded text-sm">
                       Delete
                     </button>
                   </td>

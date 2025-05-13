@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getAllFeedbacks } from '@/services/member/feedbackService'; // use feedback service
+import { getAllFeedbacks } from '@/services/member/feedbackService';
 import { FaSearch } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
 
 const ManageTrainerRatings = () => {
   const [ratings, setRatings] = useState([]);
@@ -13,14 +14,14 @@ const ManageTrainerRatings = () => {
         const res = await getAllFeedbacks();
         const feedbackList = res.data.feedbacks || [];
 
-        console.log(res)
-
-        // Filter only feedbacks which have trainer_id (trainer feedbacks)
-        const trainerRatings = feedbackList.filter(f => f.trainerId !== null);
+        // Filter only feedbacks where trainerName exists (cleaner approach)
+        const trainerRatings = feedbackList.filter(f => f.trainerName);
+        console.log(trainerRatings)
 
         setRatings(trainerRatings);
       } catch (error) {
         console.error('Failed to load ratings:', error);
+        toast.error('Failed to load ratings');
       } finally {
         setLoading(false);
       }
@@ -57,9 +58,9 @@ const ManageTrainerRatings = () => {
       ) : (
         <div className="overflow-x-auto bg-white rounded-lg shadow">
           <table className="w-full table-auto text-sm">
-            <thead className="bg-gray-100">
+            <thead className="bg-gray-100 text-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left">Trainer ID</th>
+                <th className="px-6 py-3 text-left">Trainer</th>
                 <th className="px-6 py-3 text-left">Rating</th>
                 <th className="px-6 py-3 text-left">Feedback</th>
                 <th className="px-6 py-3 text-left">Date</th>
@@ -67,11 +68,11 @@ const ManageTrainerRatings = () => {
             </thead>
             <tbody>
               {filteredRatings.map((rating) => (
-                <tr key={rating.feedbackId} className="border-b">
-                  <td className="px-6 py-4">{rating.trainerId}</td>
+                <tr key={rating.feedbackId} className="border-b hover:bg-gray-50">
+                  <td className="px-6 py-4">{rating.trainerName || 'Unknown Trainer'}</td>
                   <td className="px-6 py-4">{rating.rating} / 5</td>
                   <td className="px-6 py-4">{rating.feedbackText || 'No feedback'}</td>
-                  <td className="px-6 py-4">{rating.feedbackDate}</td>
+                  <td className="px-6 py-4">{new Date(rating.feedbackDate).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

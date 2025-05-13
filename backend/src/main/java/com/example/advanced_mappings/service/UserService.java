@@ -21,6 +21,10 @@ public interface UserService {
     // Role and approval management:
     Response getPendingTrainers();
     Response approveTrainer(Long userId);
+
+    Response getPendingStaff();
+    Response approveStaff(Long userId);
+
     Response updateRole(Long userId, Role newRole);
 
     // Session-related:

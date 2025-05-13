@@ -15,6 +15,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,24 +25,22 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     private final FeedbackRepository feedbackRepository;
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
 
     @Override
     public Response createFeedback(FeedbackDTO feedbackDTO) {
-        // Fetch member (user)
         User member = userRepository.findById(feedbackDTO.getUserId())
                 .orElseThrow(() -> new NotFoundException("Member user not found"));
 
-        // Fetch trainer (user)
         User trainer = userRepository.findById(feedbackDTO.getTrainerId())
                 .orElseThrow(() -> new NotFoundException("Trainer user not found"));
 
-        // Map DTO to entity
-        Feedback feedback = modelMapper.map(feedbackDTO, Feedback.class);
-
-        // Set relationships explicitly
-        feedback.setMember(member);
-        feedback.setTrainer(trainer);
+        Feedback feedback = Feedback.builder()
+                .feedbackText(feedbackDTO.getFeedbackText())
+                .rating(feedbackDTO.getRating())
+                .feedbackDate(new Date())
+                .member(member)
+                .trainer(trainer)
+                .build();
 
         feedbackRepository.save(feedback);
 
@@ -54,12 +53,14 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public Response getAllFeedbacks() {
         List<Feedback> feedbacks = feedbackRepository.findAll(Sort.by(Sort.Direction.DESC, "feedbackId"));
-        List<FeedbackDTO> dtoList = feedbacks.stream().map(fb -> {
-            FeedbackDTO dto = modelMapper.map(fb, FeedbackDTO.class);
-            dto.setUserId(fb.getMember().getId());
-            dto.setTrainerId(fb.getTrainer().getId());
-            return dto;
-        }).toList();
+        List<FeedbackDTO> dtoList = feedbacks.stream().map(fb -> FeedbackDTO.builder()
+                .feedbackId(fb.getFeedbackId())
+                .feedbackText(fb.getFeedbackText())
+                .rating(fb.getRating())
+                .feedbackDate(fb.getFeedbackDate())
+                .memberName(fb.getMember().getUserName())
+                .trainerName(fb.getTrainer().getUserName())
+                .build()).toList();
 
         return Response.builder()
                 .status(200)
@@ -70,41 +71,46 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public Response getFeedbackById(Long id) {
-        Feedback feedback = feedbackRepository.findById(id)
+        Feedback fb = feedbackRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Feedback not found"));
 
-        FeedbackDTO feedbackDTO = modelMapper.map(feedback, FeedbackDTO.class);
-        feedbackDTO.setUserId(feedback.getMember().getId());
-        feedbackDTO.setTrainerId(feedback.getTrainer().getId());
+        FeedbackDTO dto = FeedbackDTO.builder()
+                .feedbackId(fb.getFeedbackId())
+                .feedbackText(fb.getFeedbackText())
+                .rating(fb.getRating())
+                .feedbackDate(fb.getFeedbackDate())
+                .memberName(fb.getMember().getUserName())
+                .trainerName(fb.getTrainer().getUserName())
+                .build();
 
         return Response.builder()
                 .status(200)
                 .message("success")
-                .feedback(feedbackDTO)
+                .feedback(dto)
                 .build();
     }
 
     @Override
     public Response updateFeedback(Long id, FeedbackDTO feedbackDTO) {
-        Feedback feedback = feedbackRepository.findById(id)
+        Feedback fb = feedbackRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Feedback Not Found"));
 
-        modelMapper.map(feedbackDTO, feedback);
+        fb.setFeedbackText(feedbackDTO.getFeedbackText());
+        fb.setRating(feedbackDTO.getRating());
 
-        // Ensure correct user/trainer assignment during update
         if (feedbackDTO.getUserId() != null) {
             User member = userRepository.findById(feedbackDTO.getUserId())
                     .orElseThrow(() -> new NotFoundException("Member user not found"));
-            feedback.setMember(member);
+            fb.setMember(member);
         }
 
         if (feedbackDTO.getTrainerId() != null) {
             User trainer = userRepository.findById(feedbackDTO.getTrainerId())
                     .orElseThrow(() -> new NotFoundException("Trainer user not found"));
-            feedback.setTrainer(trainer);
+            fb.setTrainer(trainer);
         }
 
-        feedbackRepository.save(feedback);
+        feedbackRepository.save(fb);
 
         return Response.builder()
                 .status(200)
@@ -125,4 +131,5 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .build();
     }
 }
+
 

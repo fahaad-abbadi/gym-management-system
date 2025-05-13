@@ -55,6 +55,19 @@ public class UserController {
         return ResponseEntity.ok(userService.approveTrainer(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/pending-staff")
+    public ResponseEntity<Response> getPendingStaff() {
+        return ResponseEntity.ok(userService.getPendingStaff());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/approve-staff/{id}")
+    public ResponseEntity<Response> approveStaff(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.approveStaff(id));
+    }
+
+
     @PutMapping("/update-role/{userId}")
     public ResponseEntity<Response> updateUserRole(
             @PathVariable Long userId,
