@@ -27,24 +27,8 @@ The Gym Management System is an advanced Java-based solution designed to streaml
 - **MySQL/PostgreSQL (Optional for persistence layer)**
 - **Lombok (for cleaner code, optional)**
 
-## Entity Relationship Overview
-
-| Entity           | Description                          |
-|------------------|--------------------------------------|
-| Member           | Personal details and memberships     |
-| Trainer          | Trainer profiles and responsibilities|
-| Staff            | Non-training staff management        |
-| Class            | Gym classes with schedules           |
-| WorkoutPlan      | Detailed workout plans               |
-| DietPlan         | Custom diet plans                    |
-| ClassEnrollment  | Track class enrollments              |
-| Attendance       | Track class and session attendance   |
-| Feedback         | Member feedback and ratings          |
-| Inventory        | Manage gym inventory items           |
-| Membership       | Membership details and payments      |
-| TrainerSchedule  | Manage trainer schedules             |
-| WorkoutSession   | Sessions under workout plans         |
-| Equipment        | Gym equipment tracking               |
+## Admin Dashboard
+![image](https://github.com/user-attachments/assets/8b3e7a63-08a0-475d-9376-04fad65842ac)
 
 ## Enums Used
 
